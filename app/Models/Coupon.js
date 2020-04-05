@@ -3,7 +3,7 @@
 /** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Model = use('Model')
 
-class Cupon extends Model {
+class Coupon extends Model {
 
     static get dates(){
         return ['created_at', 'updated_at', 'valid_from', 'valid_until']
@@ -23,4 +23,4 @@ class Cupon extends Model {
 
 }
 
-module.exports = Cupon
+module.exports = Coupon

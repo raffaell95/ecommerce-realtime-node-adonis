@@ -51,7 +51,7 @@ class User extends Model {
   }
 
   coupons(){
-    return this.belongsToMany('App/Models/Cupon')
+    return this.belongsToMany('App/Models/Coupon')
   }
 
 }

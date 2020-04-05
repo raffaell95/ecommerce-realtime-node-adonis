@@ -13,7 +13,7 @@ class Discount extends Model {
     }
 
     coupon(){
-        return this.belongsTo('App/Models/Cupon', 'coupon_id', 'id')
+        return this.belongsTo('App/Models/Coupon', 'coupon_id', 'id')
     }
 }
 

@@ -17,7 +17,7 @@ class Order extends Model {
         return this.hasMany('App/Models/OrderItem')
     }
     coupons(){
-        return this.belongsToMany('App/Models/Cupon')
+        return this.belongsToMany('App/Models/Coupon')
     }
 
     dicounts(){
