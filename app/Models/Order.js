@@ -13,6 +13,10 @@ class Order extends Model {
 
     }
 
+    static get table(){
+        return 'order'
+    }
+
     items(){
         return this.hasMany('App/Models/OrderItem')
     }
