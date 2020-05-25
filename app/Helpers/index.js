@@ -3,6 +3,12 @@
 const crypto = use('crypto')
 const Helpers = use('Helpers')
 
+/**
+ * Generate random string
+ *
+ * @param { int } length - O  tamanho da string que você quer gerar
+ * @return { string } uma string randomica do tamaho de length
+ */
 const str_random = async (length = 40) => {
   let string = ''
   let len = string.length
@@ -19,6 +25,13 @@ const str_random = async (length = 40) => {
   return string
 }
 
+/**
+ * Move um único arquivo para o caminho especificado, se nenhum for especificado
+ * então 'public/uploads' será utilizado.
+ * @param { FileJar } file o arquivo a ser gerenciado
+ * @param { string } path o caminho para onde o arquivo deve ser movido
+ * @return { Object<FileJar> }
+ */
 const manage_single_upload = async (file, path = null) => {
   path = path ? path : Helpers.publicPath('uploads')
   // gera um nome aleatório
@@ -33,6 +46,13 @@ const manage_single_upload = async (file, path = null) => {
   return file
 }
 
+/**
+ * Move um múltiplos arquivos para o caminho especificado, se nenhum for especificado
+ * então 'public/uploads' será utilizado.
+ * @param { FileJar } fileJar
+ * @param { string } path
+ * @return { Object }
+ */
 const manage_multiple_uploads = async (fileJar, path = null) => {
   path = path ? path : Helpers.publicPath('uploads')
   let successes = [],
@@ -58,7 +78,6 @@ const manage_multiple_uploads = async (fileJar, path = null) => {
 
   return { successes, errors }
 }
-
 module.exports = {
   str_random,
   manage_single_upload,

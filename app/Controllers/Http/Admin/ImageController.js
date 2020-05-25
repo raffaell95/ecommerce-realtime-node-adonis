@@ -7,6 +7,7 @@
 const Image = use('App/Models/Image')
 const { manage_single_upload, manage_multiple_uploads } = use('App/Helpers')
 const fs = use('fs')
+const Transformer = use('App/Transformers/Admin/ImageTransformer')
 const Helpers = use('Helpers')
 
 /**
@@ -22,9 +23,12 @@ class ImageController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async index ({ response, pagination }) {
-    const images = await Image.query().orderBy('id', 'DESC').paginate(pagination.page, pagination.limit)
-    return response.send(images) 
+  async index({ response, pagination, transform }) {
+    var images = await Image.query()
+      .orderBy('id', 'DESC')
+      .paginate(pagination.page, pagination.limit)
+    images = await transform.paginate(images, Transformer)
+    return response.send(images)
   }
 
   /**
@@ -35,53 +39,61 @@ class ImageController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async store ({ request, response }) {
+  async store({ request, response, transform }) {
     try {
-      const filejar = request.file('images', {
+      // captura uma image ou mais do request
+      const fileJar = request.file('images', {
         types: ['image'],
         size: '2mb'
       })
 
+      // retorno pro usuário
       let images = []
-      
-      if(!filejar.files){
-        const file = await manage_single_upload(filejar)
-        if(file.moved()){
-          const image = await Image.create({
-            path: file.fileame,
-            size: file.size,
-            original_name: file.clientName,
-            extension: file.subtype
-          })
-
-          images.push(image)
-          return response.status(201).send({
-            successes: images, errors: {}
-          })
-        }
-
-        return response.status(400).send({
-          message: 'Não foi possivel processar essa imagem no momento!'
-        })
-      }
-
-      let files = await manage_multiple_uploads(filejar)
-      await Promise.all(
-        files.successes.map(async file =>{
+      // caso seja um unico arquivo - manage_single_upload
+      if (!fileJar.files) {
+        const file = await manage_single_upload(fileJar)
+        if (file.moved()) {
           const image = await Image.create({
             path: file.fileName,
             size: file.size,
             original_name: file.clientName,
             extension: file.subtype
           })
+
+          // transnformação
+          const transformedImage = await transform.item(image, Transformer)
+
+          images.push(transformedImage)
+
+          return response.status(201).send({ successes: images, errors: {} })
+        }
+
+        return response.status(400).send({
+          message: 'Não foi possível processar esta imagem no momento!'
+        })
+      }
+      // caso sejam vários arquivos - manage_multiple_uploads
+      let files = await manage_multiple_uploads(fileJar)
+
+      await Promise.all(
+        files.successes.map(async file => {
+          const image = await Image.create({
+            path: file.fileName,
+            size: file.size,
+            original_name: file.clientName,
+            extension: file.subtype
+          })
+          const transformedImage = await transform.item(image, Transformer)
+          images.push(transformedImage)
         })
       )
 
-      return response.status(201).send({successes: images, errors: files.errors})
-
+      return response
+        .status(201)
+        .send({ successes: images, errors: files.errors })
     } catch (error) {
       return response.status(400).send({
-        message: 'Não fpo possivel processar a sua solicitação!'
+        message: 'Não foi possível processar a sua solicitação!'
       })
     }
   }
@@ -95,8 +107,9 @@ class ImageController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async show ({ params:{ id }, request, response, view }) {
-    const image = await Image.findOrFail(id)
+  async show({ params: { id }, request, response, transform }) {
+    var image = await Image.findOrFail(id)
+    image = transform.item(image, Transformer)
     return response.send(image)
   }
 
@@ -108,15 +121,16 @@ class ImageController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async update ({ params: { id }, request, response }) {
-    const image = await Image.findOrFail(id)
+  async update({ params: { id }, request, response, transform }) {
+    var image = await Image.findOrFail(id)
     try {
       image.merge(request.only(['original_name']))
       await image.save()
-      response.status(200).send(image)
+      image = await transform.item(image, Transformer)
+      return response.status(200).send(image)
     } catch (error) {
       return response.status(400).send({
-        message: 'Não foi possivel atualizar esta imagem no momento!'
+        message: 'Não foi possível atualizar esta imagem no momento!'
       })
     }
   }
@@ -129,16 +143,17 @@ class ImageController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async destroy ({ params:{ id }, request, response }) {
+  async destroy({ params: { id }, request, response }) {
     const image = await Image.findOrFail(id)
     try {
       let filepath = Helpers.publicPath(`uploads/${image.path}`)
+
       fs.unlinkSync(filepath)
       await image.delete()
       return response.status(204).send()
     } catch (error) {
       return response.status(400).send({
-        message: 'Não foi possivel deletar a imagem no momento!'
+        message: 'Não foi possível deletar a imagem no momento!'
       })
     }
   }

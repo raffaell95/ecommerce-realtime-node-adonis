@@ -4,7 +4,6 @@
 const Env = use('Env')
 
 module.exports = {
-
   /*
   |--------------------------------------------------------------------------
   | Application Name
@@ -81,7 +80,6 @@ module.exports = {
     |
     */
     jsonpCallback: 'callback',
-
 
     /*
     |--------------------------------------------------------------------------
@@ -220,7 +218,7 @@ module.exports = {
       driver: 'file',
       name: 'ecommerce-realtime',
       filename: 'ecommerce-error.log',
-      level: 'info'
+      level: 'error'
     }
   },
 

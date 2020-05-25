@@ -1,10 +1,11 @@
 'use strict'
 
 class AdminStoreCategory {
-  get rules () {
+  get rules() {
     return {
+      // validation rules
       title: 'required',
-      description: 'description'
+      description: 'required'
     }
   }
 }

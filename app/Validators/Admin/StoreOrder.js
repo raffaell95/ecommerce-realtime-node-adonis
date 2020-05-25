@@ -1,9 +1,10 @@
 'use strict'
 
 class AdminStoreOrder {
-  get rules () {
+  get rules() {
     return {
-      'items.*.product_id': 'exists:products, id',
+      // validation rules
+      'items.*.product_id': 'exists:products,id',
       'items.*.quantity': 'min:1'
     }
   }

@@ -4,18 +4,28 @@
 const Schema = use('Schema')
 
 class PasswordResetSchema extends Schema {
-  up () {
-    this.create('password_resets', (table) => {
+  up() {
+    this.create('password_resets', table => {
       table.increments()
-      table.string('email', 254).notNullable()
-      table.string('token').notNullable().unique()
+      table.string('email').notNullable()
+      table
+        .string('token')
+        .notNullable()
+        .unique()
+
       table.dateTime('expires_at')
-      table.foreign('email').references('email').inTable('users').onDelete('cascade')
+
       table.timestamps()
+
+      table
+        .foreign('email')
+        .references('email')
+        .inTable('users')
+        .onDelete('cascade')
     })
   }
 
-  down () {
+  down() {
     this.drop('password_resets')
   }
 }
